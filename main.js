@@ -57,12 +57,8 @@ class AsciinemaApp {
         }
 
         const path = argv[argv.length - 1];
-        const tmpf = temp.openSync('asciinema');
-
-        fs.copyFileSync(path, tmpf.path);
-
         try {
-            return 'file:///' + (tmpf.path.replace(/^\/(.+)$/g, '$1').replace(/\\/g, '/'));
+            return fs.readFileSync(path);
         }
         catch(e) {
             console.error(e);
