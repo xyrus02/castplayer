@@ -10,7 +10,6 @@
     "readme": "README.md",
     "license": "MIT",
     "dependencies": {
-        "asciinema-player": "^2.6.1",
         "temp": "^0.9.1"
     },
     "main": "main.js",
