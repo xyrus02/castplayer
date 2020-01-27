@@ -1,0 +1,23 @@
+{
+    "name": "asciinema-electron",
+    "displayName": "asciinema Electron",
+    "version": "1.0.0-SNAPSHOT",
+    "description": "asciinema as Electron app",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/xyrus02/asciinema-electron.git"
+    },
+    "readme": "README.md",
+    "license": "MIT",
+    "dependencies": {
+        "asciinema-player": "^2.6.1",
+        "temp": "^0.9.1"
+    },
+    "main": "main.js",
+    "scripts": {
+        "start": "electron ."
+    },
+    "devDependencies": {
+        "electron": "^7.1.10"
+    }
+}
