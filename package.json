@@ -1,22 +1,24 @@
 {
-    "name": "asciinema-electron",
-    "displayName": "asciinema Electron",
+    "name": "asciinema-local",
+    "displayName": "Local asciinema cast player",
     "version": "1.0.0-SNAPSHOT",
-    "description": "asciinema as Electron app",
+    "description": "Local asciinema cast player",
     "repository": {
         "type": "git",
-        "url": "https://github.com/xyrus02/asciinema-electron.git"
+        "url": "https://github.com/xyrus02/asciinema-local.git"
     },
     "readme": "README.md",
     "license": "MIT",
     "dependencies": {
-        "temp": "^0.9.1"
+        "asciinema-player": "^2.6.1"
     },
-    "main": "main.js",
+    "main": "src/app/main.js",
     "scripts": {
-        "start": "electron ."
+        "start": "electron .",
+        "build": "electron-packager . asciinema --platform darwin,linux,win32 --arch x64 --asar --out=target/"
     },
     "devDependencies": {
-        "electron": "^7.1.10"
+        "electron": "^7.1.10",
+        "electron-packager": "^14.2.0"
     }
 }
