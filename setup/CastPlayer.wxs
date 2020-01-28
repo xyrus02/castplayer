@@ -1,0 +1,185 @@
+<Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
+
+    <?define ProductName = "CastPlayer" ?>
+    <?define ProductAuthor = "Georg Kiehne" ?>
+    <?define ProductVersion = "1.0.0" ?>
+    <?define ProductUpgradeCode = "ee757f64-ec36-4c0c-ba85-6789242351ec" ?>
+
+    <Product 
+        Id="*"
+        Name="$(var.ProductName)"
+        Manufacturer="$(var.ProductAuthor)"
+        UpgradeCode="$(var.ProductUpgradeCode)"
+        Language="1033" Codepage="1252" 
+        Version="$(var.ProductVersion)">
+
+        <Package 
+            InstallerVersion="405" Compressed="yes"
+			InstallPrivileges="limited" SummaryCodepage="1252"
+			Description="$(var.ProductName) Setup"
+			Manufacturer="$(var.ProductAuthor)"
+			Comments="$(var.ProductVersion)" />
+
+        <Upgrade Id="$(var.ProductUpgradeCode)">
+			<UpgradeVersion Property="OLD_VERSION_FOUND" Minimum="0.0.0.0" Maximum="$(var.ProductVersion)" IncludeMaximum="no" IncludeMinimum="yes" OnlyDetect="no" IgnoreRemoveFailure="no" MigrateFeatures="yes" />
+			<UpgradeVersion Property="NEWER_VERSION_FOUND" Minimum="$(var.ProductVersion)" IncludeMaximum="no" IncludeMinimum="no" OnlyDetect="yes"  />
+		</Upgrade>
+
+        <Media Id="1" Cabinet="data.cab" EmbedCab="yes" />
+        <Icon Id="SetupIcon" SourceFile="src\resources\app.ico"/>
+
+        <Property Id="ARPPRODUCTICON" Value="SetupIcon" />
+        <Property Id="ALLUSERS" Secure="yes" />
+        <Property Id="ARPNOREPAIR" Value="yes" Secure="yes" />
+        <Property Id="WIXUI_INSTALLDIR" Value="APPLICATIONFOLDER" />
+
+        <Condition Message="This application can't be installed globally. Setup will now quit.">
+            <![CDATA[NOT ALLUSERS]]>
+        </Condition>
+
+        <Condition Message="A newer version of $(var.ProductName) is already installed.">
+            <![CDATA[Installed OR NOT NEWER_VERSION_FOUND]]>
+        </Condition>
+
+        <InstallExecuteSequence>
+            <InstallExecute Before="RemoveExistingProducts"></InstallExecute>
+            <RemoveExistingProducts Before="InstallFinalize"></RemoveExistingProducts>
+        </InstallExecuteSequence>
+
+        <Feature 
+            Id="CoreFeature" Title="$(var.ProductName)"
+            Description="Contains the application files of $(var.ProductName)" 
+            Absent="disallow" AllowAdvertise="no">
+            
+            <ComponentRef Id="Binaries" />
+            <ComponentRef Id="AppAsar" />
+            <ComponentRef Id="Locales" />
+            <ComponentRef Id="Shortcuts" />
+        </Feature>
+
+        <Directory Id="TARGETDIR" Name="SourceDir">
+            <Directory Id="LocalAppDataFolder" Name="AppData">
+                <Directory Id="PRODUCTROOT" Name="CastPlayer">
+                    <Component Id="Binaries" Guid="cfdb4625-751f-4de3-a4b6-87e4b04aaa87">
+                        <CreateFolder />
+                        <RemoveFolder Id="RemoveProductRoot" On="uninstall" Directory="PRODUCTROOT" />
+
+                        <RegistryKey Root="HKCU" Key="SOFTWARE\$(var.ProductName)">
+                            <RegistryValue Type="string" Name="InstallDirectory" Value="[PRODUCTROOT]" />
+                            <RegistryValue Type="string" Name="Version" Value="$(var.ProductVersion)" />
+                        </RegistryKey>
+
+                        <RegistryKey Root="HKCU" Key="SOFTWARE\$(var.ProductName)\Publish">
+                            <RegistryValue Type="binary" Name="cfdb4625-751f-4de3-a4b6-87e4b04aaa87" Value="1" KeyPath="yes" />
+                        </RegistryKey>
+
+                        <File Source="$(var.Build)\castplayer.exe" />
+                        <File Source="$(var.Build)\chrome_100_percent.pak" />
+                        <File Source="$(var.Build)\chrome_200_percent.pak" />
+                        <File Source="$(var.Build)\d3dcompiler_47.dll" />
+                        <File Source="$(var.Build)\ffmpeg.dll" />
+                        <File Source="$(var.Build)\icudtl.dat" />
+                        <File Source="$(var.Build)\libEGL.dll" />
+                        <File Source="$(var.Build)\libGLESv2.dll" />
+                        <File Source="$(var.Build)\natives_blob.bin" />
+                        <File Source="$(var.Build)\resources.pak" />
+                        <File Source="$(var.Build)\snapshot_blob.bin" />
+                        <File Source="$(var.Build)\v8_context_snapshot.bin" />
+                        <File Source="$(var.Build)\version" />
+                    </Component>
+
+                    <Directory Id="LocalesDir" Name="locales">
+                        <Component Id="Locales" Guid="28cd6735-fbab-4046-87d7-658434fa2391">
+                            <RemoveFolder Id="RemoveLocalesDir" On="uninstall" Directory="LocalesDir" />
+
+                            <RegistryKey Root="HKCU" Key="SOFTWARE\$(var.ProductName)\Publish">
+                                <RegistryValue Type="binary" Name="28cd6735-fbab-4046-87d7-658434fa2391" Value="1" KeyPath="yes" />
+                            </RegistryKey>
+
+                            <File Source="$(var.Build)\locales\am.pak" />
+                            <File Source="$(var.Build)\locales\ar.pak" />
+                            <File Source="$(var.Build)\locales\bg.pak" />
+                            <File Source="$(var.Build)\locales\bn.pak" />
+                            <File Source="$(var.Build)\locales\ca.pak" />
+                            <File Source="$(var.Build)\locales\cs.pak" />
+                            <File Source="$(var.Build)\locales\da.pak" />
+                            <File Source="$(var.Build)\locales\de.pak" />
+                            <File Source="$(var.Build)\locales\el.pak" />
+                            <File Source="$(var.Build)\locales\en-GB.pak" />
+                            <File Source="$(var.Build)\locales\en-US.pak" />
+                            <File Source="$(var.Build)\locales\es-419.pak" />
+                            <File Source="$(var.Build)\locales\es.pak" />
+                            <File Source="$(var.Build)\locales\et.pak" />
+                            <File Source="$(var.Build)\locales\fa.pak" />
+                            <File Source="$(var.Build)\locales\fi.pak" />
+                            <File Source="$(var.Build)\locales\fil.pak" />
+                            <File Source="$(var.Build)\locales\fr.pak" />
+                            <File Source="$(var.Build)\locales\gu.pak" />
+                            <File Source="$(var.Build)\locales\he.pak" />
+                            <File Source="$(var.Build)\locales\hi.pak" />
+                            <File Source="$(var.Build)\locales\hr.pak" />
+                            <File Source="$(var.Build)\locales\hu.pak" />
+                            <File Source="$(var.Build)\locales\id.pak" />
+                            <File Source="$(var.Build)\locales\it.pak" />
+                            <File Source="$(var.Build)\locales\ja.pak" />
+                            <File Source="$(var.Build)\locales\kn.pak" />
+                            <File Source="$(var.Build)\locales\ko.pak" />
+                            <File Source="$(var.Build)\locales\lt.pak" />
+                            <File Source="$(var.Build)\locales\lv.pak" />
+                            <File Source="$(var.Build)\locales\ml.pak" />
+                            <File Source="$(var.Build)\locales\mr.pak" />
+                            <File Source="$(var.Build)\locales\ms.pak" />
+                            <File Source="$(var.Build)\locales\nb.pak" />
+                            <File Source="$(var.Build)\locales\nl.pak" />
+                            <File Source="$(var.Build)\locales\pl.pak" />
+                            <File Source="$(var.Build)\locales\pt-BR.pak" />
+                            <File Source="$(var.Build)\locales\pt-PT.pak" />
+                            <File Source="$(var.Build)\locales\ro.pak" />
+                            <File Source="$(var.Build)\locales\ru.pak" />
+                            <File Source="$(var.Build)\locales\sk.pak" />
+                            <File Source="$(var.Build)\locales\sl.pak" />
+                            <File Source="$(var.Build)\locales\sr.pak" />
+                            <File Source="$(var.Build)\locales\sv.pak" />
+                            <File Source="$(var.Build)\locales\sw.pak" />
+                            <File Source="$(var.Build)\locales\ta.pak" />
+                            <File Source="$(var.Build)\locales\te.pak" />
+                            <File Source="$(var.Build)\locales\th.pak" />
+                            <File Source="$(var.Build)\locales\tr.pak" />
+                            <File Source="$(var.Build)\locales\uk.pak" />
+                            <File Source="$(var.Build)\locales\vi.pak" />
+                            <File Source="$(var.Build)\locales\zh-CN.pak" />
+                            <File Source="$(var.Build)\locales\zh-TW.pak" />
+                        </Component>
+                    </Directory>
+
+                    <Directory Id="ResourcesDir" Name="resources">
+                        <Component Id="AppAsar" Guid="cb5db152-ca13-4b08-baf8-9acbcadab99f">
+                            <RemoveFolder Id="RemoveResourcesDir" On="uninstall" Directory="ResourcesDir" />
+
+                            <RegistryKey Root="HKCU" Key="SOFTWARE\$(var.ProductName)\Publish">
+                                <RegistryValue Type="binary" Name="cb5db152-ca13-4b08-baf8-9acbcadab99f" Value="1" KeyPath="yes" />
+                            </RegistryKey>
+
+                            <File Source="$(var.Build)\resources\app.asar" />
+                        </Component>
+                    </Directory>
+                </Directory>
+            </Directory>
+
+            <Directory Id="ProgramMenuFolder">
+                <Component Id="Shortcuts" Guid="16d96bc9-660e-4605-baad-fe331abb48ac">
+                    <RegistryKey Root="HKCU" Key="SOFTWARE\$(var.ProductName)\Publish">
+                        <RegistryValue Type="binary" Name="16d96bc9-660e-4605-baad-fe331abb48ac" Value="1" KeyPath="yes" />
+                    </RegistryKey>
+
+                    <Shortcut
+                        Id="ProductLauncherShortcut" Name="$(var.ProductName)" Description="$(var.ProductName)"
+                        Target="[PRODUCTROOT]castplayer.exe" WorkingDirectory="PersonalFolder"/>
+                    <Shortcut
+                        Id="UninstallProductShortcut" Name="Uninstall $(var.ProductName)" Description="Uninstalls $(var.ProductName)"
+                        Target="[SystemFolder]msiexec.exe" Arguments="/x [ProductCode]" />
+                </Component>
+            </Directory>
+        </Directory>
+    </Product>
+</Wix>

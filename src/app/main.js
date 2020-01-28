@@ -27,7 +27,7 @@ class AsciinemaApp {
         });
 
         this.application.on('ready', () => {
-            self.initialize(self.context);
+            self.initialize.call(self, self.context);
 
             if (!self.context.cast) {
                 self.application.quit(self.context.code);
@@ -46,21 +46,23 @@ class AsciinemaApp {
     initialize(context) {
         const argv = process.argv;
 
+        if (this.application.isPackaged) {
+            argv.unshift(null)
+        }
+
         context.title = null;
         context.cast = null;
         context.arguments = argv;
         context.code = 0;
 
-        var path;
+        let path = null;
 
         try {
-            // require 2 args when starting from source, otherwise only 1
-            const nReq = (argv||[''])[0] === 'electron' ? 2 : 1;
-
-            if (argv && argv.length && argv.length > nReq) {
+            if (argv && argv.length > 2) {
                 path = argv[argv.length - 1];
             }
-            else {
+
+            if (path === null) {
                 const result = dialog.showOpenDialogSync({ 
                     properties: ['openFile'], 
                     title: 'Open cast...',
@@ -96,7 +98,7 @@ class AsciinemaApp {
 
         this.window = new BrowserWindow({
             title: this.context.title || "Player",
-            icon: 'src/resources/ico/application-console-media-play.ico',
+            icon: 'src/resources/app.' + (process.platform == 'darwin' ? 'icns' : 'ico'),
             resizable: false,
             'use-content-size': true,
             webPreferences: {
@@ -118,11 +120,6 @@ class AsciinemaApp {
         });
 
         return this.window;
-    }
-
-    static getContextFromArguments(argv) {
-
-        
     }
 };
 

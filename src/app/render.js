@@ -14,11 +14,11 @@ if (context && context.cast) {
         
             ipcRenderer.send('resize', dim.width, dim.height);
         },
-        title: context.title,
+        title: 'CastPlayer - ' + context.title,
         loop: true,
         autoPlay: true,
         fontSize: 'normal'
     });
 
-    document.title = context.title;
+    document.title = 'CastPlayer - ' + context.title;
 }

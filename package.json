@@ -1,21 +1,26 @@
 {
-    "name": "asciinema-local",
-    "displayName": "Local asciinema cast player",
+    "name": "castplayer",
+    "productName": "CastPlayer",
+    "displayName": "CastPlayer",
     "version": "1.0.0-SNAPSHOT",
-    "description": "Local asciinema cast player",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/xyrus02/asciinema-local.git"
-    },
-    "readme": "README.md",
-    "license": "MIT",
-    "dependencies": {
-        "asciinema-player": "^2.6.1"
-    },
+    "description": "Allows local playback for asciinema-compatible cast files",
     "main": "src/app/main.js",
     "scripts": {
         "start": "electron .",
-        "build": "electron-packager . asciinema --platform darwin,linux,win32 --arch x64 --asar --out=target/"
+        "pack:osx": "electron-packager . castplayer --asar --out=target/osx --platform=darwin --arch=x64 --overwrite --icon=src/resources/app.icns",
+        "pack:win": "electron-packager . castplayer --asar --out=target/win --platform=win32 --arch=x64 --overwrite --icon=src/resources/app.ico",
+        "pack:linux": "electron-packager . castplayer --asar --out=target/linux --platform=linux --arch=x64 --overwrite",
+        "build": "npm run pack:osx && npm run pack:win && npm run pack:linux",
+        "build-setup": "npm run pack:win && setup\\make.cmd"
+    },
+    "readme": "README.md",
+    "license": "Apache2.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/xyrus02/castplayer.git"
+    },
+    "dependencies": {
+        "asciinema-player": "^2.6.1"
     },
     "devDependencies": {
         "electron": "^7.1.10",
