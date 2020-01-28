@@ -52,8 +52,12 @@ class AsciinemaApp {
         context.code = 0;
 
         var path;
+
         try {
-            if (argv && argv.length && argv.length > 2) {
+            // require 2 args when starting from source, otherwise only 1
+            const nReq = (argv||[''])[0] === 'electron' ? 2 : 1;
+
+            if (argv && argv.length && argv.length > nReq) {
                 path = argv[argv.length - 1];
             }
             else {
