@@ -20,7 +20,8 @@
         "url": "https://github.com/xyrus02/castplayer.git"
     },
     "dependencies": {
-        "asciinema-player": "^2.6.1"
+        "asciinema-player": "^2.6.1",
+        "jquery": "^3.4.1"
     },
     "devDependencies": {
         "electron": "^7.1.10",

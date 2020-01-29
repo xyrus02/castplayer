@@ -6,17 +6,16 @@
         <link rel="stylesheet" type="text/css" href="../../node_modules/asciinema-player/resources/public/css/asciinema-player.css" />
         <style type="text/css">
             body { margin: 0; background: #121314; }
-            #player {
-                position: absolute;
-                left: 0;
-                top: 0;
-            }
+            #player {position: absolute;left: 0;top: 0;}
             .asciinema-player .control-bar { display: none; }
         </style>
     </head>
     <body>
         <div id="player"></div>
-        <script src="../../node_modules/asciinema-player/resources/public/js/asciinema-player.js"></script>
-        <script src="render.js"></script>
+        <script type="text/javascript">if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+        <script type="text/javascript" src="../../node_modules/asciinema-player/resources/public/js/asciinema-player.js"></script>
+        <script type="text/javascript" src="../../node_modules/jquery/dist/jquery.min.js"></script>
+        <script type="text/javascript" src="render.js"></script>
+        <script type="text/javascript">if (window.module) module = window.module;</script>
     </body>
 </html>

@@ -99,7 +99,7 @@ class AsciinemaApp {
         this.window = new BrowserWindow({
             title: this.context.title || "Player",
             icon: 'src/resources/app.' + (process.platform == 'darwin' ? 'icns' : 'ico'),
-            resizable: false,
+            //resizable: false,
             'use-content-size': true,
             webPreferences: {
                 nodeIntegration: true
