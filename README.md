@@ -1,4 +1,5 @@
 # CastPlayer
+![](assets/hello-world.cast.gif)
 This application wraps the (wonderful) **asciinema** player into a small Electron app which allows the user to 
 playback casts without using the command line and without connecting to the internet or even sharing the cast 
 to the internet first.
