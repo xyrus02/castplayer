@@ -20,7 +20,9 @@
         "url": "https://github.com/xyrus02/castplayer.git"
     },
     "dependencies": {
+        "@fortawesome/fontawesome-free": "^5.12.0",
         "asciinema-player": "^2.6.1",
+        "html2canvas": "^1.0.0-rc.5",
         "jquery": "^3.4.1"
     },
     "devDependencies": {

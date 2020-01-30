@@ -1,0 +1,68 @@
+body { margin: 0; background: #121314; }
+
+div#player { 
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+ }
+ div#player div.player-client {
+    position: absolute;
+    left: 0;
+    top: 0;
+ }
+ div#player div.player-client .asciinema-player .control-bar {
+    display: none;
+ }
+div#player div.controls {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 10px;
+    background: #121314;
+    color: #fff;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    opacity: 0;
+}
+div#player div.controls button {
+    background: none;
+	border: none;
+	cursor: pointer;
+    color: #fff;
+    flex: 0 0 auto;
+    margin-right: 20px;
+    width: 20px;
+    height: 20px;
+    outline: none;
+}
+div#player div.controls button.play i.fas.fa-play { display: none; }
+div#player div.controls button.pause i.fas.fa-pause { display: none; }
+div#player div.controls input[type='range'] { 
+    flex: 1 1 auto;
+    -webkit-appearance: none !important;
+    background: #000;
+	border: #666 1px solid;
+    height: 4px;
+    outline: none;
+}
+div#player div.controls input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none !important;
+    background: #FFF;
+    height:15px;
+    width:15px;
+	border-radius:100%;
+    cursor:pointer;
+}
+div#player div.controls div.seek-position {
+    flex: 0 0 auto;
+    width: auto;
+    padding-left: 20px;
+    padding-right: 10px;
+    text-align: right;
+    font-size: small;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
