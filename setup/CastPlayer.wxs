@@ -2,7 +2,7 @@
 
     <?define ProductName = "CastPlayer" ?>
     <?define ProductAuthor = "Georg Kiehne" ?>
-    <?define ProductVersion = "1.0.0" ?>
+    <?define ProductVersion = "1.2.0" ?>
     <?define ProductUpgradeCode = "ee757f64-ec36-4c0c-ba85-6789242351ec" ?>
 
     <Product 
@@ -27,6 +27,7 @@
 
         <Media Id="1" Cabinet="data.cab" EmbedCab="yes" />
         <Icon Id="SetupIcon" SourceFile="src\resources\app.ico"/>
+        <Icon Id="FileTypeIcon" SourceFile="src\resources\file.ico" />
 
         <Property Id="ARPPRODUCTICON" Value="SetupIcon" />
         <Property Id="ALLUSERS" Secure="yes" />
@@ -73,7 +74,8 @@
                             <RegistryValue Type="binary" Name="cfdb4625-751f-4de3-a4b6-87e4b04aaa87" Value="1" KeyPath="yes" />
                         </RegistryKey>
 
-                        <File Source="$(var.Build)\castplayer.exe" />
+                        <File Id="ExeFile" Source="$(var.Build)\castplayer.exe" />
+                        <File Id="IconFile" Source="src\resources\file.ico" />
                         <File Source="$(var.Build)\chrome_100_percent.pak" />
                         <File Source="$(var.Build)\chrome_200_percent.pak" />
                         <File Source="$(var.Build)\d3dcompiler_47.dll" />
@@ -86,6 +88,33 @@
                         <File Source="$(var.Build)\snapshot_blob.bin" />
                         <File Source="$(var.Build)\v8_context_snapshot.bin" />
                         <File Source="$(var.Build)\version" />
+
+                        <!-- Capabilities keys for Vista/7 "Set Program Access and Defaults" -->
+                        <RegistryValue Root="HKCU" Key="SOFTWARE\$(var.ProductName)\Capabilities" Name="ApplicationDescription" Value="$(var.ProductName)" Type="string" />
+                        <RegistryValue Root="HKCU" Key="SOFTWARE\$(var.ProductName)\Capabilities" Name="ApplicationIcon" Value="[PRODUCTROOT]castplayer.exe,0" Type="string" />
+                        <RegistryValue Root="HKCU" Key="SOFTWARE\$(var.ProductName)\Capabilities" Name="ApplicationName" Value="$(var.ProductName)" Type="string" />
+                        <RegistryValue Root="HKCU" Key="SOFTWARE\$(var.ProductName)\Capabilities\DefaultIcon" Value="[PRODUCTROOT]castplayer.exe,1" Type="string" />
+                        <RegistryValue Root="HKCU" Key="SOFTWARE\$(var.ProductName)\Capabilities\FileAssociations" Name=".cast" Value="CastPlayer.Document" Type="string" />
+                        <RegistryValue Root="HKCU" Key="SOFTWARE\$(var.ProductName)\Capabilities\MIMEAssociations" Name="application/json+asciicast" Value="CastPlayer.Document" Type="string" />
+                        <RegistryValue Root="HKCU" Key="SOFTWARE\$(var.ProductName)\Capabilities\shell\Open\command" Value="&quot;[PRODUCTROOT]castplayer.exe&quot; &quot;%1&quot;" Type="string" />
+                        <RegistryValue Root="HKCU" Key="SOFTWARE\RegisteredApplications" Name="$(var.ProductName)" Value="SOFTWARE\$(var.ProductName)\Capabilities" Type="string" />
+
+                        <!-- App Paths to support Start,Run,"castplayer" -->
+                        <RegistryValue Root="HKCU" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\castplayer.exe" Value="[!castplayer.exe]" Type="string" />
+                        <RegistryValue Root="HKCU" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\castplayer.exe" Name="Path" Value="[PRODUCTROOT]" Type="string" />
+
+                        <!-- Extend to the "open with" list + Win7 jump menu pinning  -->
+                        <RegistryValue Root="HKCU" Key="SOFTWARE\Classes\Applications\castplayer.exe\SupportedTypes" Name=".cast" Value="" Type="string" />
+                        <RegistryValue Root="HKCU" Key="SOFTWARE\Classes\Applications\castplayer.exe\shell\open" Name="FriendlyAppName" Value="$(var.ProductName)" Type="string" />
+
+                        <!-- Propert progId -->
+                        <RegistryValue Root="HKCU" Key="SOFTWARE\Classes\CastPlayer.Document" Name="FriendlyTypeName" Value="Cast" Type="string" />
+                        <ProgId Id="CastPlayer.Document" Description="Cast" Icon="IconFile">
+                            <Extension Id="cast">
+                                <Verb Id="open" Argument="&quot;%1&quot;" TargetFile="ExeFile" />
+                                <MIME ContentType="application/json+asciicast" Default="yes" />
+                            </Extension>
+                        </ProgId>
                     </Component>
 
                     <Directory Id="LocalesDir" Name="locales">
