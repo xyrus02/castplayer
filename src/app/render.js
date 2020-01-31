@@ -38,18 +38,20 @@
                     ipcRenderer.send('resize', dim.width, dim.height);
                 },
                 title: 'CastPlayer - ' + this.context.title || 'untitled cast',
-                loop: true,
                 autoPlay: true,
                 fontSize: 'normal'
             };
 
             this.isPlaying = true;
+            this.isLooping = true;
+
             this.player = asciinema.player.js.CreatePlayer(this.elementId, 'data:application/json,' + encodeURI(this.context.cast), playerOpts);        
 
             const self = this;
 
             document.title = playerOpts.title; 
             setTimeout(() => $(self.element).show(), 500);
+            setTimeout(() => self.updateLoop(), 100);
             
             return this;
         }
@@ -58,7 +60,7 @@
             this.controls = ctl;
             const self = this;
 
-            this.controls.play.on('click', () => {
+            const togglePlay = function() {
 
                 var fun;
                 if (self.isPlaying) {
@@ -73,6 +75,31 @@
                 }
 
                 fun.call(self)
+            };
+
+            const showBar = function() {
+                if ($(self.controls.bar).data('sto')) {
+                    clearTimeout($(self.controls.bar).data('sto'));
+                }
+                $(self.controls.bar).stop().animate({opacity: 1}, 250);
+                $(self.controls.bar).data('sto', setTimeout(() => $(self.controls.bar).stop().animate({opacity: 0}, 250), 1000));
+            };
+
+            $(window).on('keyup', (e) => {
+                if (e.code === "Space") {
+                    togglePlay();
+                }
+
+                showBar();
+            });
+
+            $('body').on('mousemove', showBar);
+
+            this.controls.play.on('click', togglePlay);
+
+            this.controls.loop.on('click', () => {
+                const isLooping = self.isLooping;
+                self.setIsLooping.call(self, !isLooping);
             });
 
             this.controls.seek.on('input', () => {
@@ -86,6 +113,14 @@
                 self.controls.seek.attr('data-updating', 'false');
             });
 
+            this.controls.seek.on('change', () => {
+
+                if (self.isPlaying) {
+                    self.player.play();
+                }
+            });
+
+            this.setIsLooping(this.isLooping);
             this.updatePosition();
             return this;
         }
@@ -129,8 +164,6 @@
             const d = this.player.getDuration();
             const time = pos / 100.0 * d;
 
-            console.log(time);
-
             this.player.pause();
             this.player.setCurrentTime(time);
 
@@ -139,6 +172,41 @@
             }
 
             return this;
+        }
+
+        setIsLooping(val) {
+            this.isLooping = val;
+            if (this.controls && this.controls.loop) {
+                (this.isLooping 
+                    ? this.controls.loop.addClass 
+                    : this.controls.loop.removeClass
+                ).call(this.controls.loop, 'active');
+            }
+        }
+
+        updateLoop() {
+            if (!this.player) {
+                return;
+            }
+
+            const self = this;
+            const time = this.player.getCurrentTime();
+            const duration = this.player.getDuration();
+
+            if (this.isPlaying && (time >= duration) && (duration > 0)) {
+                this.player.pause();
+
+                if (this.isLooping) {
+                    this.player.setCurrentTime(0);
+                    this.player.play();
+                } else {
+                    $(self.controls.play).addClass('pause');
+                    $(self.controls.play).removeClass('play');
+                    this.isPlaying = false;
+                }
+            }
+
+            setTimeout(() => self.updateLoop.call(self), 100);
         }
 
         updatePosition() {
@@ -181,6 +249,9 @@
             .append($('<i/>').addClass('fas').addClass('fa-play'))
             .append($('<i/>').addClass('fas').addClass('fa-pause'));
 
+        const $loopButton = $('<button/>').addClass('loop')
+            .append($('<i/>').addClass('fas').addClass('fa-undo'));
+
         const $seekSlider = $('<input/>').addClass('seek')
             .attr('type', 'range')
             .attr('min', 0)
@@ -193,25 +264,20 @@
 
         const $controls = $('<div/>').addClass('controls')
             .append($playButton)
+            .append($loopButton)
             .append($seekSlider)
             .append($seekPosition);
 
-        const self = this;
-
         this.append($controls);
-        this.on('mousemove', () => {
-            if (self.data('sto')) {
-                clearTimeout(self.data('sto'));
-            }
-            $controls.stop().animate({opacity: 1}, 250);
-            self.data('sto', setTimeout(() => $controls.stop().animate({opacity: 0}, 250), 1000));
-        })
 
         if (typeof require !== "undefined") {
             this.api = new AsciinemaPlayer(this, require('electron').remote.getGlobal('context'))
                 .initialize()
                 .bind({
+                    frame: this,
+                    bar: $controls,
                     play: $playButton,
+                    loop: $loopButton,
                     seek: $seekSlider,
                     position: $seekPosition
                 });

@@ -99,8 +99,9 @@ class AsciinemaApp {
         this.window = new BrowserWindow({
             title: this.context.title || "Player",
             icon: 'src/resources/app.' + (process.platform == 'darwin' ? 'icns' : 'ico'),
-            //resizable: false,
             'use-content-size': true,
+            minWidth: 640,
+            minHeight: 480,
             webPreferences: {
                 nodeIntegration: true
             }
@@ -116,7 +117,10 @@ class AsciinemaApp {
         });
 
         ipcMain.on('resize', function (e, x, y) {
+            
             self.window.setContentSize(x, y);
+            const s = self.window.getSize();
+            self.window.setMinimumSize(s[0], s[1]);
         });
 
         return this.window;

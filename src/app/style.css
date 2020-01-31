@@ -1,4 +1,4 @@
-body { margin: 0; background: #121314; }
+body { margin: 0; background: #121314; overflow: hidden; }
 
 div#player { 
     position: absolute;
@@ -38,6 +38,9 @@ div#player div.controls button {
     width: 20px;
     height: 20px;
     outline: none;
+}
+div#player div.controls button.active {
+    color: #ff9933;
 }
 div#player div.controls button.play i.fas.fa-play { display: none; }
 div#player div.controls button.pause i.fas.fa-pause { display: none; }
