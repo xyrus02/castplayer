@@ -80,7 +80,7 @@ class AsciinemaApp {
             }
 
             context.title = path;
-            context.cast = fs.readFileSync(path);
+            context.cast = fs.readFileSync(path, "utf8").trim();
         }
         catch(e) {
             dialog.showErrorBox("Error", (e||{}).message || e || "Unknown error.");

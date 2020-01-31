@@ -52,12 +52,19 @@
             this.isPlaying = true;
             this.isLooping = false;
 
-            this.player = asciinema.player.js.CreatePlayer(this.elementId, 'data:application/json,' + encodeURI(this.context.cast), playerOpts);        
+            try {
+                const uri = 'data:application/json,' + encodeURIComponent(this.context.cast);
+                this.player = asciinema.player.js.CreatePlayer(this.elementId, uri, playerOpts);        
+            }
+            catch (e) {
+                console.error(e);
+                return false;
+            }
 
             const self = this;
 
             document.title = playerOpts.title; 
-            $('body').css({'background-color': $('pre.asciinema-terminal').css('background-color')});
+            $('body').css({'background-color': $('pre.asciinema-terminal').css('background-color')||'black'});
 
             setTimeout(() => $(self.element).show(), 500);
             setTimeout(() => self.updateLoop(), 100);
@@ -303,9 +310,12 @@
         this.append($controls);
 
         if (typeof require !== "undefined") {
-            this.api = new AsciinemaPlayer(this, require('electron').remote.getGlobal('context'))
-                .initialize()
-                .bind({
+            this.api = new AsciinemaPlayer(this, require('electron').remote.getGlobal('context')).initialize();
+            if (!this.api) {
+                $(this.api.element).hide();
+            }
+
+            this.api.bind({
                     frame: this,
                     bar: $controls,
                     play: $playButton,

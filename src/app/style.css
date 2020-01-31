@@ -16,9 +16,13 @@ div#player div.player-client {
     left: 0;
     top: 0;
 }
-div#player div.player-client .asciinema-player .control-bar {
+div#player div.player-client .asciinema-player .control-bar,
+div#player div.player-client .asciinema-player .loading {
     display: none;
 }
+
+/* Controls */
+
 div#player div.controls {
     position: absolute;
     left: 0;
