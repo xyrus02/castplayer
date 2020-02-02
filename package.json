@@ -13,13 +13,14 @@
     },
     "scripts": {
         "start": "electron .",
+        "version": "node -p -e \"require('./package.json').version\"",
         "build:win": "electron-packager . castplayer --prune=true --asar --ignore=target --out=target --platform=win32 --arch=x64 --overwrite --icon=src/resources/app.ico",
         "build:linux": "electron-packager . castplayer --prune=true --asar --ignore=target --out=target --platform=linux --arch=x64 --overwrite",
         "build": "npm run build:win && npm run build:linux",
-        "pack:win-setup": "node build/win-setup.js --in target/castplayer-win32-x64 --use build/win-setup/*.wxs --out target/castplayer-win32-x64-setup.msi",
-        "pack:win-zip": "node build/zip.js --in ** --out target/castplayer-win32-x64.zip --base target/castplayer-win32-x64",
+        "pack:win-setup": "node build/win-setup.js --in target/castplayer-win32-x64 --use build/win-setup/*.wxs --out target/castplayer-win32-x64-setup.msi --suffix-version",
+        "pack:win-zip": "node build/zip.js --in ** --out target/castplayer-win32-x64.zip --base target/castplayer-win32-x64 --suffix-version",
         "pack:win": "npm run build:win && npm run pack:win-zip && npm run pack:win-setup",
-        "pack:linux": "npm run build:linux && node build/zip.js --in ** --out target/castplayer-linux-x64.tar.gz --base target/castplayer-linux-x64 --format tar",
+        "pack:linux": "npm run build:linux && node build/zip.js --in ** --out target/castplayer-linux-x64.tar.gz --base target/castplayer-linux-x64 --format tar --suffix-version",
         "pack": "npm run pack:win && npm run pack:linux"
     },
     "readme": "README.md",

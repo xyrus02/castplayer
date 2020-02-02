@@ -18,6 +18,7 @@
             use: null,
             out: null,
             tmp: temp.path({suffix:'.wxobj'}),
+            suffixVersion: false,
             meta: {
                 name: process.env.npm_package_displayName||"CastPlayer",
                 author: process.env.npm_package_author_name||"CastPlayer Developers",
@@ -39,6 +40,10 @@
                     args.shift();
                     options.out = args.shift();
                     break;
+                case "--suffix-version":
+                    options.suffixVersion = true; 
+                    args.shift();
+                    break;
                 default: 
                     console.error('Invalid argument:', args.shift());
                     process.exit(1);
@@ -46,8 +51,12 @@
         }
     
         if (!options.in || !options.out || !options.use) {
-            console.error('Usage: --in <electron-package-output> --out <msi-target-file> --use <wxs-sources>');
+            console.error('Usage: --in <electron-package-output> --out <msi-target-file> --use <wxs-sources> [--sufix-version]');
             process.exit(1);
+        }
+
+        if (options.suffixVersion && process.env.npm_package_version) {
+            options.out = options.out.replace(/(\.[^\.]+)$/, '-' + process.env.npm_package_version + '$1');
         }
 
         return options;

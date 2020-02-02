@@ -16,7 +16,8 @@
             in: null,
             out: null,
             format: 'zip',
-            base: ''
+            base: '',
+            suffixVersion: false
         };
     
         while (args.length > 0) {
@@ -37,6 +38,10 @@
                     args.shift();
                     options.format = args.shift();
                     break;
+                case "--suffix-version":
+                    options.suffixVersion = true; 
+                    args.shift();
+                    break;
                 default: 
                     console.error('Invalid argument:', args.shift());
                     process.exit(1);
@@ -44,8 +49,12 @@
         }
     
         if (!options.in || !options.out) {
-            console.error('Usage: --in <electron-package-output> --out <zip-target-file> [--format zip|tar] [--base <zip-base-path>]');
+            console.error('Usage: --in <electron-package-output> --out <zip-target-file> [--format zip|tar] [--base <zip-base-path>] [--sufix-version]');
             process.exit(1);
+        }
+
+        if (options.suffixVersion && process.env.npm_package_version) {
+            options.out = options.out.replace(/(\.[^\.]+)$/, '-' + process.env.npm_package_version + '$1');
         }
 
         return options;
