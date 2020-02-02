@@ -5,13 +5,22 @@
     "version": "1.2.0",
     "description": "Allows local playback for asciinema-compatible cast files",
     "main": "src/app/main.js",
+    "private": true,
+    "author": {
+        "name": "Georg Kiehne",
+        "email": "info@xyrus-worx.org",
+        "url": "https://github.com/xyrus02"
+    },
     "scripts": {
         "start": "electron .",
-        "pack:osx": "electron-packager . castplayer --prune=true --asar --out=target/osx --platform=darwin --arch=x64 --overwrite --icon=src/resources/app.icns",
-        "pack:win": "electron-packager . castplayer --prune=true --asar --out=target/win --platform=win32 --arch=x64 --overwrite --icon=src/resources/app.ico",
-        "pack:linux": "electron-packager . castplayer --prune=true --asar --out=target/linux --platform=linux --arch=x64 --overwrite",
-        "build": "npm run pack:osx && npm run pack:win && npm run pack:linux",
-        "build-setup": "npm run pack:win && setup\\make.cmd"
+        "build:win": "electron-packager . castplayer --prune=true --asar --ignore=target --out=target --platform=win32 --arch=x64 --overwrite --icon=src/resources/app.ico",
+        "build:linux": "electron-packager . castplayer --prune=true --asar --ignore=target --out=target --platform=linux --arch=x64 --overwrite",
+        "build": "npm run build:win && npm run build:linux",
+        "pack:win-setup": "node build/win-setup.js --in target/castplayer-win32-x64 --use build/win-setup/*.wxs --out target/castplayer-win32-x64-setup.msi",
+        "pack:win-zip": "node build/zip.js --in ** --out target/castplayer-win32-x64.zip --base target/castplayer-win32-x64",
+        "pack:win": "npm run build:win && npm run pack:win-zip && npm run pack:win-setup",
+        "pack:linux": "npm run build:linux && node build/zip.js --in ** --out target/castplayer-linux-x64.tar.gz --base target/castplayer-linux-x64 --format tar",
+        "pack": "npm run pack:win && npm run pack:linux"
     },
     "readme": "README.md",
     "license": "Apache2.0",
@@ -20,11 +29,18 @@
         "url": "https://github.com/xyrus02/castplayer.git"
     },
     "devDependencies": {
+        "@fortawesome/fontawesome-free": "^5.12.0",
+        "archiver": "^3.1.1",
+        "asciinema-player": "^2.6.1",
         "electron": "^7.1.10",
         "electron-packager": "^14.2.0",
-        "@fortawesome/fontawesome-free": "^5.12.0",
-        "asciinema-player": "^2.6.1",
+        "glob": "^7.1.6",
+        "hasbin": "^1.2.3",
         "html2canvas": "^1.0.0-rc.5",
-        "jquery": "^3.4.1"
+        "jquery": "^3.4.1",
+        "temp": "^0.9.1"
+    },
+    "dependencies": {
+        "cross-env": "^7.0.0"
     }
 }

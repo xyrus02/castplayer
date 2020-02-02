@@ -1,8 +1,5 @@
 <Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
 
-    <?define ProductName = "CastPlayer" ?>
-    <?define ProductAuthor = "Georg Kiehne" ?>
-    <?define ProductVersion = "1.2.0" ?>
     <?define ProductUpgradeCode = "ee757f64-ec36-4c0c-ba85-6789242351ec" ?>
 
     <Product 
@@ -16,9 +13,9 @@
         <Package 
             InstallerVersion="405" Compressed="yes"
 			InstallPrivileges="limited" SummaryCodepage="1252"
-			Description="$(var.ProductName) Setup"
+			Description="$(var.ProductName)"
 			Manufacturer="$(var.ProductAuthor)"
-			Comments="$(var.ProductVersion)" />
+			Comments="v$(var.ProductVersion)" />
 
         <Upgrade Id="$(var.ProductUpgradeCode)">
 			<UpgradeVersion Property="OLD_VERSION_FOUND" Minimum="0.0.0.0" Maximum="$(var.ProductVersion)" IncludeMaximum="no" IncludeMinimum="yes" OnlyDetect="no" IgnoreRemoveFailure="no" MigrateFeatures="yes" />
@@ -60,7 +57,7 @@
 
         <Directory Id="TARGETDIR" Name="SourceDir">
             <Directory Id="LocalAppDataFolder" Name="AppData">
-                <Directory Id="PRODUCTROOT" Name="CastPlayer">
+                <Directory Id="PRODUCTROOT" Name="$(var.ProductName)">
                     <Component Id="Binaries" Guid="cfdb4625-751f-4de3-a4b6-87e4b04aaa87">
                         <CreateFolder />
                         <RemoveFolder Id="RemoveProductRoot" On="uninstall" Directory="PRODUCTROOT" />
