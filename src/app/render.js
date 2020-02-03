@@ -20,20 +20,28 @@
 
             const $client = $('<div></div>')
                 .addClass('player-client')
-                .attr('id', this.elementId = 'pc-' + Math.round(Math.random()*0xffffff))
-                .hide();
+                .attr('id', this.elementId = 'pc-' + Math.round(Math.random()*0xffffff));
 
             this.owner = query.get(0);
             this.element = $client.get(0);
             this.context = context;
 
-            $(this.owner).prepend($client)
+            
+            $(this.owner)
+                .prepend($client)
+                .append(this.overlay = $('<div/>')
+                    .addClass('overlay')
+                    .append('<div class="lds-ripple"><div></div><div></div></div>')
+                    .append(this.overlayStatus = $('<span/>').addClass('status').text('please wait')));
         }
 
         initialize() {
 
+            const self = this;
             const element = this.element;
+
             const { ipcRenderer } = require('electron');
+
             const playerOpts = {
                 onCanPlay: function() {
                     const dim = {
@@ -42,6 +50,7 @@
                     };
                 
                     ipcRenderer.send('resize', dim.width, dim.height);
+                    setTimeout(() => $(self.overlay).hide(), 500);
                 },
                 title: 'CastPlayer - ' + this.context.title || 'untitled cast',
                 autoPlay: true,
@@ -61,12 +70,18 @@
                 return false;
             }
 
-            const self = this;
-
             document.title = playerOpts.title; 
-            $('body').css({'background-color': $('pre.asciinema-terminal').css('background-color')||'black'});
+            $('body, div.overlay').css({'background-color': $('pre.asciinema-terminal').css('background-color')||'black'});
 
-            setTimeout(() => $(self.element).show(), 500);
+            ipcRenderer.on('savedgif', function (e, path) {
+                self.overlay.hide();
+                self.overlayStatus.text('please wait');
+
+                if (self.isPlaying) {
+                    self.player.play();
+                }
+            });
+
             setTimeout(() => self.updateLoop(), 100);
             
             return this;
@@ -108,6 +123,8 @@
                 const isLooping = self.isLooping;
                 self.setIsLooping.call(self, !isLooping);
             });
+
+            this.controls.export.on('click', () => self.export());
 
             this.controls.seek.on('input', () => {
 
@@ -263,14 +280,62 @@
             return this;
         }
 
-        export() {
+        async export() {
             if (!this.player) {
                 return;
             }
 
-            html2canvas(this.element).then(function(canvas) {
-                console.log(canvas);
+            const { ipcRenderer } = require('electron');
+
+            this.player.pause();
+            this.overlay.show();
+
+            const self = this;
+            const originalPos = this.player.getCurrentTime();
+
+            const fps = 10.0;
+            const frames = Math.floor(this.player.getDuration()) * fps;
+            const step = 1.0 / fps;
+            let time = 0.0;
+
+            const gif = new GIF({
+                workers: 2,
+                workerScript: '../lib/gifjs/gif.worker.js',
+                quality: 30,
+                width: Math.round($(this.element).innerWidth()),
+                height: Math.round($(this.element).innerHeight())
             });
+              
+            for(let i = 0; i < frames; i++) {
+                gif.addFrame(await html2canvas(this.element));
+                this.player.setCurrentTime(time,{delay: 0});
+                time += step;
+
+                this.overlayStatus.text(`rendering frame ${i + 1} of ${frames}`);
+            }
+
+            this.overlayStatus.text(`creating output stream`)
+            this.player.setCurrentTime(originalPos);
+
+            let ff = 0;
+            gif.on('progress', function(v) {
+                self.overlayStatus.text(`compressing frame ${++ff} of ${frames}`);
+            })
+
+            gif.on('finished', function(blob) {
+                let reader = new FileReader();
+
+                self.overlayStatus.text(`saving output stream`)
+
+                reader.onload = function() {
+                    if (reader.readyState == 2) {
+                        ipcRenderer.send("savegif", new Buffer(reader.result));
+                    }
+                };
+                reader.readAsArrayBuffer(blob);
+            });
+              
+            gif.render();
         }
     }
 
@@ -289,7 +354,7 @@
             .append($('<span/>').addClass('tip').addClass('fstate-disable').text('Disable automatic repeat'));
 
         const $exportButton = $('<button/>').addClass('export')
-            .append($('<i/>').addClass('fas').addClass('fa-film'))
+            .append($('<i/>').addClass('fas').addClass('fa-video'))
             .append($('<span/>').addClass('tip').addClass('right').text('Save as GIF'));
 
         const $seekBar = $('<div/>').addClass('seek-bg')

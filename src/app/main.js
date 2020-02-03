@@ -116,6 +116,26 @@ class AsciinemaApp {
             self.window = null;
         });
 
+        ipcMain.on("savegif", (e, buffer) => {
+
+            const result = dialog.showSaveDialogSync({ 
+                properties: ['openFile'], 
+                title: 'Save cast as GIF...',
+                filters: [
+                    { name: 'Graphics interchange format (*.gif)', extensions: ['gif'] },
+                    { name: 'All Files', extensions: ['*'] }
+                ]
+            });
+
+            if (!result) {
+                e.sender.send("savedgif", null);
+                return;
+            }
+
+            fs.writeFileSync(result, buffer);
+            e.sender.send("savedgif", result);
+        })
+
         ipcMain.on('resize', function (e, x, y) {
             
             self.window.setContentSize(x, y);
