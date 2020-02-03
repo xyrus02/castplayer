@@ -38,7 +38,7 @@
                 onCanPlay: function() {
                     const dim = {
                         width: Math.round($(element).innerWidth()),
-                        height: Math.round($(element).innerHeight())
+                        height: Math.round($(element).innerHeight() + 50)
                     };
                 
                     ipcRenderer.send('resize', dim.width, dim.height);
@@ -288,6 +288,10 @@
             .append($('<span/>').addClass('tip').addClass('fstate-enable').text('Enable automatic repeat'))
             .append($('<span/>').addClass('tip').addClass('fstate-disable').text('Disable automatic repeat'));
 
+        const $exportButton = $('<button/>').addClass('export')
+            .append($('<i/>').addClass('fas').addClass('fa-film'))
+            .append($('<span/>').addClass('tip').addClass('right').text('Save as GIF'));
+
         const $seekBar = $('<div/>').addClass('seek-bg')
             .css({'width': '0%'});
 
@@ -305,7 +309,8 @@
             .append($playButton)
             .append($loopButton)
             .append($('<div/>').addClass('seek-wrapper').append($seekBar, $seekSlider))
-            .append($seekPosition);
+            .append($seekPosition)
+            .append($exportButton);
 
         this.append($controls);
 
@@ -322,7 +327,8 @@
                     loop: $loopButton,
                     seek: $seekSlider,
                     seekBar: $seekBar,
-                    position: $seekPosition
+                    position: $seekPosition,
+                    export: $exportButton
                 });
         }
         else {
