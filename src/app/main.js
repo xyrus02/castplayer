@@ -116,6 +116,11 @@ class AsciinemaApp {
             self.window = null;
         });
 
+        ipcMain.on("error", (e, error) => {
+            dialog.showErrorBox("Error", `Unable to load cast: ${error}`);
+            self.application.exit(0);
+        });
+
         ipcMain.on("savegif", (e, buffer) => {
 
             const result = dialog.showSaveDialogSync({ 
