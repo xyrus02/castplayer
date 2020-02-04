@@ -63,9 +63,18 @@
 
             try {
                 const uri = 'data:application/json,' + encodeURIComponent(this.context.cast);
+                const header = JSON.parse(this.context.cast.split(/\r?\n/g)[0]);
+                const frames = this.context.cast.split(/\r?\n/g).filter((_,i)=>i>0).map(x => [].concat(JSON.parse(x)||[]));
+
+                console.log('Loaded cast:', header);
+                console.log('Loaded frames:', frames);
+
+                this.castInfo = header;
+                this.frameInfos = frames;
                 this.player = asciinema.player.js.CreatePlayer(this.elementId, uri, playerOpts);        
             }
             catch (e) {
+                ipcRenderer.send('error', e);
                 console.error(e);
                 return false;
             }
@@ -293,10 +302,8 @@
             const self = this;
             const originalPos = this.player.getCurrentTime();
 
-            const fps = 10.0;
-            const frames = Math.floor(this.player.getDuration()) * fps;
-            const step = 1.0 / fps;
-            let time = 0.0;
+            const frames = this.frameInfos.length;
+            let nextTime = 0, time = 0.0;
 
             const gif = new GIF({
                 workers: 2,
@@ -305,21 +312,20 @@
                 width: Math.round($(this.element).innerWidth()),
                 height: Math.round($(this.element).innerHeight())
             });
-              
-            for(let i = 0; i < frames; i++) {
-                gif.addFrame(await html2canvas(this.element));
-                this.player.setCurrentTime(time,{delay: 0});
-                time += step;
 
+            for (let i = 0; i < this.frameInfos.length; i++) {
+                time = this.frameInfos[i][0];
+                nextTime = i < this.frameInfos.length - 1 ? this.frameInfos[i + 1][0] : time + 2;
+                this.player.setCurrentTime(time);
+                gif.addFrame(await html2canvas(this.element),{delay: Math.round((nextTime - time) * 1000)});
                 this.overlayStatus.text(`rendering frame ${i + 1} of ${frames}`);
             }
-
+            
             this.overlayStatus.text(`creating output stream`)
             this.player.setCurrentTime(originalPos);
 
-            let ff = 0;
             gif.on('progress', function(v) {
-                self.overlayStatus.text(`compressing frame ${++ff} of ${frames}`);
+                self.overlayStatus.text(`compressing frame ${1 + Math.round(v * (frames - 1))} of ${frames}`);
             })
 
             gif.on('finished', function(blob) {
