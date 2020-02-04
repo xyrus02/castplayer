@@ -59,6 +59,7 @@
             };
 
             this.isPlaying = true;
+            this.isExporting = false;
             this.isLooping = false;
 
             try {
@@ -74,7 +75,7 @@
                 this.player = asciinema.player.js.CreatePlayer(this.elementId, uri, playerOpts);        
             }
             catch (e) {
-                ipcRenderer.send('error', e);
+                ipcRenderer.send('error', e.message||`${e}`);
                 console.error(e);
                 return false;
             }
@@ -89,6 +90,8 @@
                 if (self.isPlaying) {
                     self.player.play();
                 }
+
+                self.isExporting = false;
             });
 
             setTimeout(() => self.updateLoop(), 100);
@@ -229,7 +232,7 @@
         }
 
         updateLoop() {
-            if (!this.player) {
+            if (!this.player || this.isExporting) {
                 return;
             }
 
@@ -254,7 +257,7 @@
         }
 
         updatePosition() {
-            if (!this.controls || !this.player) {
+            if (!this.controls || !this.player || this.isExporting) {
                 return this;
             }
 
@@ -296,6 +299,7 @@
 
             const { ipcRenderer } = require('electron');
 
+            this.isExporting = true;
             this.player.pause();
             this.overlay.show();
 
