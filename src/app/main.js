@@ -1,61 +1,79 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron')
 const fs = require("fs");
 
-class AsciinemaApp {
+class CastPlayerApp {
 
-    constructor() {
-        this.application = null;
-        this.window = null;
-        this.context = null;
-    }
+    attachEvents() {
 
-    run(electronApplication, context) {
+        const $this = this;
 
-        if (this.application) {
-            throw 'App is already running!';
-        }
-
-        const self = this;
-
-        this.application = electronApplication;
-        this.context = context;
-
-        this.application.on('window-all-closed', () => {
+        app.on('window-all-closed', () => {
             if (process.platform !== 'darwin') { // conform to MacOS guidelines
                 app.quit();
             }
         });
+        app.on('activate', () => {
+            if (!$this.window) { // conform to MacOS guidelines 
+                $this.createWindow($this.context);
+            }
+        });
+        app.on('ready', () => {
+            const {code, context} = $this.createContext();
 
-        this.application.on('ready', () => {
-            self.initialize.call(self, self.context);
-
-            if (!self.context.cast) {
-                self.application.quit(self.context.code);
+            if (!context || !context.cast) {
+                app.quit(code||-1);
             }
 
-            self.createWindow();
+            $this.context = global.context = context;
+            $this.createWindow(context);
+        })
+
+        ipcMain.on('player-ready', function (_, data) {
+            $this.window.setContentSize(data.size.width, data.size.height);
+
+            const outerSize = $this.window.getSize();
+            $this.window.setMinimumSize(outerSize[0], outerSize[1]);
+        });
+        ipcMain.on("player-error", (_, error) => {
+            dialog.showErrorBox("Error", `Unable to load cast: ${error}`);
+            app.exit(1);
+        });
+        ipcMain.on("gif-exporting", (e, buffer) => {
+
+            const result = dialog.showSaveDialogSync({ 
+                properties: ['openFile'], 
+                title: 'Save cast as GIF...',
+                filters: [
+                    { name: 'Graphics interchange format (*.gif)', extensions: ['gif'] },
+                    { name: 'All Files', extensions: ['*'] }
+                ]
+            });
+
+            if (!result) {
+                e.sender.send("gif-exported", null);
+                return;
+            }
+
+            fs.writeFileSync(result, buffer);
+            e.sender.send("gif-exported", result);
         });
 
-        this.application.on('activate', () => {
-            if (!self.window) { // conform to MacOS guidelines 
-                self.createWindow();
-            }
-        })
+        return this;
     }
 
-    initialize(context) {
+    createContext() {
         const argv = process.argv;
 
-        if (this.application.isPackaged) {
+        if (app.isPackaged) {
             argv.unshift(null)
         }
 
-        context.title = null;
-        context.cast = null;
-        context.arguments = argv;
-        context.code = 0;
-
+        let code = 0;
         let path = null;
+        let context = {
+            title: null,
+            cast: null
+        }
 
         try {
             if (argv && argv.length > 2) {
@@ -84,20 +102,20 @@ class AsciinemaApp {
         }
         catch(e) {
             dialog.showErrorBox("Error", (e||{}).message || e || "Unknown error.");
-            context.code = 1;
+            code = 1;
         }
 
-        return context;
+        return {code, context};
     }
 
-    createWindow() {
+    createWindow(context) {
 
         if (this.window) {
-            throw 'Window is already created!';
+            throw new Error('Window is already created!');
         }
 
         this.window = new BrowserWindow({
-            title: this.context.title || "Player",
+            title: context.title || "Player",
             icon: 'src/resources/app.' + (process.platform == 'darwin' ? 'icns' : 'ico'),
             'use-content-size': true,
             minWidth: 640,
@@ -107,52 +125,18 @@ class AsciinemaApp {
             }
         });
 
-        const self = this;
+        const $this = this;
 
         this.window.setMenuBarVisibility(false);
         this.window.loadFile('src/app/index.html');
         
         this.window.on('closed', () => {
-            self.window = null;
+            $this.window = null;
         });
-
-        ipcMain.on("error", (e, error) => {
-            dialog.showErrorBox("Error", `Unable to load cast: ${error}`);
-            self.application.exit(0);
-        });
-
-        ipcMain.on("savegif", (e, buffer) => {
-
-            const result = dialog.showSaveDialogSync({ 
-                properties: ['openFile'], 
-                title: 'Save cast as GIF...',
-                filters: [
-                    { name: 'Graphics interchange format (*.gif)', extensions: ['gif'] },
-                    { name: 'All Files', extensions: ['*'] }
-                ]
-            });
-
-            if (!result) {
-                e.sender.send("savedgif", null);
-                return;
-            }
-
-            fs.writeFileSync(result, buffer);
-            e.sender.send("savedgif", result);
-        })
-
-        ipcMain.on('resize', function (e, x, y) {
-            
-            self.window.setContentSize(x, y);
-            const s = self.window.getSize();
-            self.window.setMinimumSize(s[0], s[1]);
-        });
-
-        return this.window;
     }
 };
 
-new AsciinemaApp().run(app, global.context = {});
+let _ = new CastPlayerApp().attachEvents();
 
 
 

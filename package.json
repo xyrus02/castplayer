@@ -2,7 +2,7 @@
     "name": "castplayer",
     "productName": "CastPlayer",
     "displayName": "CastPlayer",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "description": "Allows local playback for asciinema-compatible cast files",
     "main": "src/app/main.js",
     "private": true,
