@@ -61,33 +61,60 @@ class CastPlayerComponentFactory {
         };
     }
 
-    createOverlay() {
+    createOverlay(owner) {
+
+        const overlayButton = this.createComponent('button', $q => $q
+            .addClass('cancel')
+            .text('Cancel')
+            .hide());
+
         const overlay = this.createComponent('div', ($q, $) => $q
             .addClass('overlay')
             .append($('<div/>').addClass('lds-ripple')
                 .append($('<div/>'))
-                .append($('<div/>'))));
+                .append($('<div/>')))
+            .append(overlayButton.$selector));
 
         const status = this.createComponent('span', $q => $q.addClass('status').text('please wait'));
 
         overlay.status = status;
         overlay.$selector.append(status.$selector);
 
+        overlayButton.$selector.click(function() {
+            if (overlay.callback) {
+                overlay.callback.call(owner);
+            }
+        });
+
         overlay.read = function() {
             return status.$selector.text();
         }
         overlay.update = function(text) {
             status.$selector.text(text || status.read());
-            return status;
+            return overlay;
         }
         overlay.show = function(text) {
             overlay.$selector.show();
             overlay.update(text || 'please wait');
-            return status;
+            return overlay;
         }
         overlay.hide = function() {
+            overlay.allowCancel(false);
             overlay.$selector.hide();
-            return status;
+            return overlay;
+        }
+        overlay.allowCancel = function(val) {
+            if (val === true) {
+                overlayButton.$selector.show();
+                return overlay;
+            }
+            else if (val === false) {
+                overlayButton.$selector.hide();
+                return overlay;
+            }
+            else {
+                return overlayButton.$selector.is(":visible");
+            }
         }
 
         return overlay;
@@ -353,6 +380,7 @@ class CastPlayer {
     async saveAsGif() {
         this.isExporting = true;
         this.player.intf.pause();
+
         this.overlay.show('exporting gif');
 
         const originalPos = this.player.intf.getCurrentTime();
@@ -368,6 +396,19 @@ class CastPlayer {
             height: (this.player.size.height - 50) * dpr /* pixels for controlbar */
         });
 
+        let compressing = false;
+        let abort = false;
+
+        this.overlay.allowCancel(true);
+        this.overlay.callback = function() {
+            if (compressing) {
+                gif.abort();
+                this.finalizeExport();
+                return;
+            }
+            abort = true;
+        };
+
         const playerNativeElement = this.player.$selector.get(0);
 
         for (let i = 0; i < this.cast.frames.length; i++) {
@@ -376,6 +417,10 @@ class CastPlayer {
             this.player.intf.setCurrentTime(time);
             gif.addFrame(await html2canvas(playerNativeElement),{delay: Math.round((nextTime - time) * 1000)});
             this.overlay.update(`rendering frame ${i + 1} of ${frames}`);
+
+            if (abort) {
+                break;
+            }
         }
         
         this.overlay.update(`creating output stream`)
@@ -398,7 +443,13 @@ class CastPlayer {
             };
             reader.readAsArrayBuffer(blob);
         });
-          
+        
+        if (abort) {
+            this.finalizeExport();
+            return;
+        }
+
+        compressing = true;
         gif.render();
     }
 

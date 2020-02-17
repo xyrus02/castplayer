@@ -41,6 +41,31 @@ div.overlay span.status {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     text-align: center;
 }
+div.overlay button.cancel {
+    color: #D62839;
+    border: 1px solid #D62839;
+    width: 90px;
+    height: 30px;
+    line-height: 30px;
+    background: transparent;
+    margin: 5px;
+    display: inline-block;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-left: -45px;
+    margin-top: 50px;
+    outline: none;
+    text-transform: uppercase;
+}
+div.overlay button.cancel:hover {
+    background: #D62839;
+    color: white;
+}
+div.overlay button.cancel:active {
+    background: rgba(214, 40, 57, 0.8);
+    color: white;
+}
 .lds-ripple {
     display: inline-block;
     position: absolute;
