@@ -359,12 +359,13 @@ class CastPlayer {
         const frames = this.cast.frames.length;
         let nextTime = 0, time = 0.0;
 
+        const dpr = window.devicePixelRatio;
         const gif = new GIF({
             workers: 2,
             workerScript: '../lib/gifjs/gif.worker.js',
             quality: 30,
-            width: this.player.size.width,
-            height: this.player.size.height - 50 /* pixels for controlbar */
+            width: this.player.size.width * dpr,
+            height: (this.player.size.height - 50) * dpr /* pixels for controlbar */
         });
 
         const playerNativeElement = this.player.$selector.get(0);
