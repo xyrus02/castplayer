@@ -33,7 +33,7 @@
         "@fortawesome/fontawesome-free": "^5.12.0",
         "archiver": "^3.1.1",
         "asciinema-player": "^2.6.1",
-        "electron": "^7.2.4",
+        "electron": "^9.4.0",
         "electron-packager": "^15.2.0",
         "gif.js": "^0.2.0",
         "glob": "^7.1.6",
